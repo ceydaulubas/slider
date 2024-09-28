@@ -6,7 +6,11 @@ interface SliderProps {
   visibleSlides?: number;
   showDots?: boolean;
   showArrows?: boolean;
-  dotsPosition?: 'top' | 'bottom';
+  dotsPosition?: 'top' | 'bottom' | 'left' | 'right';
+  slideStep?: number;
+  direction?: 'horizontal' | 'vertical';
+  arrowStyle?: 'minimal' | 'filled' | 'outlined';
+  arrowColor?: 'black' | 'white';
 }
 
 const Slider: React.FC<SliderProps> = ({
@@ -15,54 +19,62 @@ const Slider: React.FC<SliderProps> = ({
   showDots = true,
   showArrows = true,
   dotsPosition = 'bottom',
+  slideStep = 1,
+  direction = 'horizontal',
+  arrowStyle = 'minimal',  // Default to 'minimal'
+  arrowColor = 'black',    // Default arrow color is black
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const totalSlides = children.length;
-  const maxIndex = Math.ceil(totalSlides / visibleSlides) - 1;
+  const maxIndex = totalSlides - visibleSlides;
 
-  // Function to go to the next slide
+  const numberOfDots = Math.ceil((totalSlides - visibleSlides + 1) / slideStep);
+
+  const isHorizontal = direction === 'horizontal';
+
   const goToNext = () => {
-    setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, maxIndex));
+    setCurrentIndex((prevIndex) => Math.min(prevIndex + slideStep, maxIndex));
   };
 
-  // Function to go to the previous slide
   const goToPrev = () => {
-    setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+    setCurrentIndex((prevIndex) => Math.max(prevIndex - slideStep, 0));
   };
 
-  // Function to go to a specific slide
   const goToSlide = (index: number) => {
-    console.log('index', index)
     setCurrentIndex(index);
   };
 
-  // Width of visible slides
-  const slideWidthPercentage = 100 / visibleSlides;
+  const slidePercentage = isHorizontal ? 100 / visibleSlides : 100 / totalSlides;
 
   return (
-    <SliderWrapper>
+    <SliderWrapper style={{ height: isHorizontal ? 'auto' : `${visibleSlides * 200}px` }}>
       {showArrows && (
-        <Arrow direction="left" onClick={goToPrev}>
-          {'<'}
+        <Arrow direction={isHorizontal ? 'left' : 'up'} arrowStyle={arrowStyle} arrowColor={arrowColor} onClick={goToPrev}>
+          {isHorizontal ? '<' : '˄'}
         </Arrow>
       )}
 
       <SlideTrack
         style={{
-          transform: `translateX(-${currentIndex * (100 / visibleSlides)}%)`,  // Correct calculation for moving each slide group
+          transform: isHorizontal
+            ? `translateX(-${currentIndex * slidePercentage}%)`
+            : `translateY(-${currentIndex * 100 / totalSlides}%)`,
           display: 'flex',
-          width: `100%`,  // Width of all slides
+          flexDirection: isHorizontal ? 'row' : 'column',
+          width: isHorizontal ? '100%' : '100%',
+          height: isHorizontal ? 'auto' : '100%',
           transition: 'transform 0.3s ease-in-out',
         }}
       >
         {children.map((child, index) => (
           <Slide
             key={index}
-            visibleSlides={visibleSlides}  // Set width for each slide
+            visibleSlides={visibleSlides}
             style={{
-              flex: `0 0 ${slideWidthPercentage}%`,  // Width of each slide
-              width: `${slideWidthPercentage}%`,
+              flex: `0 0 ${slidePercentage}%`,
+              width: isHorizontal ? `${slidePercentage}%` : '100%',
+              height: isHorizontal ? 'auto' : `${100 / visibleSlides}%`,
               boxSizing: 'border-box',
             }}
           >
@@ -72,18 +84,18 @@ const Slider: React.FC<SliderProps> = ({
       </SlideTrack>
 
       {showArrows && (
-        <Arrow direction="right" onClick={goToNext}>
-          {'>'}
+        <Arrow direction={isHorizontal ? 'right' : 'down'} arrowStyle={arrowStyle} arrowColor={arrowColor} onClick={goToNext}>
+          {isHorizontal ? '>' : '˅'}
         </Arrow>
       )}
 
       {showDots && (
         <DotsWrapper position={dotsPosition}>
-          {Array.from({ length: Math.ceil(totalSlides / visibleSlides) }).map((_, index) => (
+          {Array.from({ length: numberOfDots }).map((_, index) => (
             <Dot
               key={index}
-              active={index === currentIndex}
-              onClick={() => goToSlide(index)}
+              active={index * slideStep === currentIndex}
+              onClick={() => goToSlide(index * slideStep)}
             />
           ))}
         </DotsWrapper>

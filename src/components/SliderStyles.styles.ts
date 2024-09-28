@@ -13,15 +13,17 @@ export const SlideTrack = styled.div`
 
 export const Slide = styled.div<{ visibleSlides: number }>`
   flex: 0 0 ${({ visibleSlides }) => 100 / visibleSlides}%;
-  width: ${({ visibleSlides }) => 100 / visibleSlides}%;
   box-sizing: border-box;
 `;
 
-export const DotsWrapper = styled.div<{ position: 'top' | 'bottom' }>`
+export const DotsWrapper = styled.div<{ position: 'top' | 'bottom' | 'left' | 'right' }>`
   display: flex;
   justify-content: center;
+  flex-direction: ${({ position }) => (position === 'left' || position === 'right' ? 'column' : 'row')};
   margin-top: ${({ position }) => (position === 'top' ? '10px' : '0')};
   margin-bottom: ${({ position }) => (position === 'bottom' ? '10px' : '0')};
+  margin-left: ${({ position }) => (position === 'left' ? '10px' : '0')};
+  margin-right: ${({ position }) => (position === 'right' ? '10px' : '0')};
 `;
 
 export const Dot = styled.div<{ active: boolean }>`
@@ -32,14 +34,43 @@ export const Dot = styled.div<{ active: boolean }>`
   margin: 0 5px;
   cursor: pointer;
 `;
-
-export const Arrow = styled.div<{ direction: 'left' | 'right' }>`
+export const Arrow = styled.div<{ direction: 'left' | 'right' | 'up' | 'down', arrowStyle: 'minimal' | 'filled' | 'outlined', arrowColor: 'black' | 'white' }>`
   position: absolute;
-  top: 50%;
-  ${({ direction }) => (direction === 'left' ? 'left: 10px;' : 'right: 10px;')}
-  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   font-size: 24px;
   cursor: pointer;
   z-index: 1;
   user-select: none;
+
+  // Horizontal arrows
+  ${({ direction }) => direction === 'left' && 'left: 10px; top: 50%; transform: translateY(-50%);'}
+  ${({ direction }) => direction === 'right' && 'right: 10px; top: 50%; transform: translateY(-50%);'}
+
+  // Vertical arrows
+  ${({ direction }) => direction === 'up' && 'top: 10px; left: 50%; transform: translateX(-50%);'}
+  ${({ direction }) => direction === 'down' && 'bottom: 10px; left: 50%; transform: translateX(-50%);'}
+
+  // Minimal style: no background or border
+  ${({ arrowStyle }) => arrowStyle === 'minimal' && `
+    background-color: transparent;
+    border: none;
+  `}
+
+  // Filled style: solid background and white arrow
+  ${({ arrowStyle, arrowColor }) => arrowStyle === 'filled' && `
+    background-color: ${arrowColor === 'white' ? 'white' : 'black'};
+    color: ${arrowColor === 'white' ? 'black' : 'white'};
+  `}
+
+  // Outlined style: transparent background with colored border and arrow
+  ${({ arrowStyle, arrowColor }) => arrowStyle === 'outlined' && `
+    background-color: transparent;
+    border: 2px solid ${arrowColor === 'white' ? 'white' : 'black'};
+    color: ${arrowColor === 'white' ? 'white' : 'black'};
+  `}
 `;
