@@ -1,46 +1,74 @@
-# Getting Started with Create React App
+# React Styled Slider Component
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A customizable and reusable slider component built with React and styled-components. This component allows developers to easily implement a slider/carousel with various configuration options, such as the number of visible slides, navigation arrows, dots, and different directions.
 
-## Available Scripts
+## Installation
 
-In the project directory, you can run:
+To install the package, use npm or yarn:
 
-### `npm start`
+```bash
+npm install react-styled-slider-component
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Usage
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Here's how to use the slider component in your React application:
 
-### `npm test`
+```tsx
+import React from 'react';
+import Slider from 'react-styled-slider-component';
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+const App: React.FC = () => {
+  return (
+    <div>
+      <Slider
+        visibleSlides={2}
+        showDots={true}
+        showArrows={true}
+        dotsPosition="bottom"
+        slideStep={1}
+        direction="horizontal"
+        arrowStyle="minimal"
+      >
+        <div style={{ backgroundColor: 'red', height: '200px' }}>Slide 1</div>
+        <div style={{ backgroundColor: 'blue', height: '200px' }}>Slide 2</div>
+        <div style={{ backgroundColor: 'green', height: '200px' }}>Slide 3</div>
+        <div style={{ backgroundColor: 'yellow', height: '200px' }}>Slide 4</div>
+        <div style={{ backgroundColor: 'red', height: '200px' }}>Slide 5</div>
+        <div style={{ backgroundColor: 'blue', height: '200px' }}>Slide 6</div>
+        <div style={{ backgroundColor: 'green', height: '200px' }}>Slide 7</div>
+        <div style={{ backgroundColor: 'yellow', height: '200px' }}>Slide 8</div>
+      </Slider>
+    </div>
+  );
+};
 
-### `npm run build`
+export default App;
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Props
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The `Slider` component accepts the following props:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+| Prop Name       | Type                                               | Default   | Description                                                                 |
+| --------------- | -------------------------------------------------- | --------- | --------------------------------------------------------------------------- |
+| `children`      | `React.ReactNode[]`                                | -         | The slides to be displayed in the slider.                                   |
+| `visibleSlides` | `number`                                           | `1`       | Number of slides visible at one time.                                       |
+| `showDots`      | `boolean`                                          | `true`    | Whether to show navigation dots below the slider.                           |
+| `showArrows`    | `boolean`                                          | `true`    | Whether to show navigation arrows on the slider.                            |
+| `dotsPosition`  | `'top' ,'bottom' , 'left' , 'right'`              | `'bottom'` | Position of the navigation dots.                                            |
+| `slideStep`     | `number`                                           | `1`       | Number of slides to move on each navigation action.                         |
+| `direction`     | `'horizontal' , 'vertical'`                        | `'horizontal'` | Direction of the slider, either horizontal or vertical.                    |
+| `arrowStyle`    | `'minimal' , 'filled' , 'outlined'`                | `'minimal'` | Style of the navigation arrows.                                             |
+| `arrowColor`    | `'black' , 'white'`                                | `'black'` | Color of the navigation arrows.                                             |
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Customization
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The slider component uses `styled-components` for styling, making it highly customizable. You can override the styles by extending the styled components used in the slider.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Contributing
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Contributions are welcome! Please open an issue or submit a pull request if you have any suggestions or improvements.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
