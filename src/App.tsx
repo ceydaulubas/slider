@@ -10,7 +10,7 @@ const App: React.FC = () => {
         showArrows={true}
         dotsPosition="bottom"
         slideStep={1}
-        direction="vertical"
+        direction="horizontal"
         arrowStyle="minimal" 
       >
         <div style={{ backgroundColor: 'red', height: '200px' }}>Slide 1</div>
