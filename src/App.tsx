@@ -4,15 +4,14 @@ import Slider from './components/Slider';
 const App: React.FC = () => {
   return (
     <div>
-      <h1>Slider with Arrow Styles and Colors</h1>
       <Slider
-        visibleSlides={4}
+        visibleSlides={2}
         showDots={true}
         showArrows={true}
         dotsPosition="bottom"
-        slideStep={4}
-        direction="horizontal"
-        arrowStyle="filled" 
+        slideStep={1}
+        direction="vertical"
+        arrowStyle="minimal" 
       >
         <div style={{ backgroundColor: 'red', height: '200px' }}>Slide 1</div>
         <div style={{ backgroundColor: 'blue', height: '200px' }}>Slide 2</div>

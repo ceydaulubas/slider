@@ -1,20 +1,33 @@
 import styled from 'styled-components';
 
-export const SliderWrapper = styled.div`
+export const SliderWrapper = styled.div<{ direction: 'horizontal' | 'vertical' }>`
   position: relative;
   width: 100%;
   overflow: hidden;
+  height: ${({ direction }) => (direction === 'vertical' ? '100%' : 'auto')}; // Ensure full height for vertical sliders
+
+  ${({ direction }) => direction === 'vertical' && `
+    display: flex;
+    flex-direction: column;
+  `}
 `;
+
 
 export const SlideTrack = styled.div`
   display: flex;
   transition: transform 0.3s ease-in-out;
 `;
 
+
 export const Slide = styled.div<{ visibleSlides: number }>`
-  flex: 0 0 ${({ visibleSlides }) => 100 / visibleSlides}%;
+  width: 100%;
+  height: 100%;
   box-sizing: border-box;
+  margin: 0; 
+  padding: 0; 
 `;
+
+
 
 export const DotsWrapper = styled.div<{ position: 'top' | 'bottom' | 'left' | 'right' }>`
   display: flex;

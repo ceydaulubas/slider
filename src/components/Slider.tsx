@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import { SliderWrapper, SlideTrack, Slide, DotsWrapper, Dot, Arrow } from './SliderStyles.styles';
+import React, { useState } from "react";
+import {
+  SliderWrapper,
+  SlideTrack,
+  Slide,
+  DotsWrapper,
+  Dot,
+  Arrow,
+} from "./SliderStyles.styles";
 
 interface SliderProps {
   children: React.ReactNode[];
   visibleSlides?: number;
   showDots?: boolean;
   showArrows?: boolean;
-  dotsPosition?: 'top' | 'bottom' | 'left' | 'right';
+  dotsPosition?: "top" | "bottom" | "left" | "right";
   slideStep?: number;
-  direction?: 'horizontal' | 'vertical';
-  arrowStyle?: 'minimal' | 'filled' | 'outlined';
-  arrowColor?: 'black' | 'white';
+  direction?: "horizontal" | "vertical";
+  arrowStyle?: "minimal" | "filled" | "outlined";
+  arrowColor?: "black" | "white";
 }
 
 const Slider: React.FC<SliderProps> = ({
@@ -18,20 +25,23 @@ const Slider: React.FC<SliderProps> = ({
   visibleSlides = 1,
   showDots = true,
   showArrows = true,
-  dotsPosition = 'bottom',
+  dotsPosition = "bottom",
   slideStep = 1,
-  direction = 'horizontal',
-  arrowStyle = 'minimal',  // Default to 'minimal'
-  arrowColor = 'black',    // Default arrow color is black
+  direction = "horizontal",
+  arrowStyle = "minimal",
+  arrowColor = "black",
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const totalSlides = children.length;
+
+  // Maximum index value, preventing overflow when navigating through slides.
   const maxIndex = totalSlides - visibleSlides;
 
+  // Calculate the number of dots based on the total number of slides and the number of visible slides.
   const numberOfDots = Math.ceil((totalSlides - visibleSlides + 1) / slideStep);
 
-  const isHorizontal = direction === 'horizontal';
+  const isHorizontal = direction === "horizontal";
 
   const goToNext = () => {
     setCurrentIndex((prevIndex) => Math.min(prevIndex + slideStep, maxIndex));
@@ -45,13 +55,27 @@ const Slider: React.FC<SliderProps> = ({
     setCurrentIndex(index);
   };
 
-  const slidePercentage = isHorizontal ? 100 / visibleSlides : 100 / totalSlides;
+  const slidePercentage = isHorizontal
+    ? 100 / visibleSlides
+    : 100 / totalSlides; 
 
   return (
-    <SliderWrapper style={{ height: isHorizontal ? 'auto' : `${visibleSlides * 200}px` }}>
+    <SliderWrapper
+      direction={direction} 
+      style={{
+        height: isHorizontal ? "auto" : `${visibleSlides * 200}px`, 
+        display: isHorizontal ? "block" : "flex",
+        flexDirection: isHorizontal ? "row" : "column",
+      }}
+    >
       {showArrows && (
-        <Arrow direction={isHorizontal ? 'left' : 'up'} arrowStyle={arrowStyle} arrowColor={arrowColor} onClick={goToPrev}>
-          {isHorizontal ? '<' : '˄'}
+        <Arrow
+          direction={isHorizontal ? "left" : "up"}
+          arrowStyle={arrowStyle}
+          arrowColor={arrowColor}
+          onClick={goToPrev}
+        >
+          {isHorizontal ? "<" : "˄"}
         </Arrow>
       )}
 
@@ -59,12 +83,13 @@ const Slider: React.FC<SliderProps> = ({
         style={{
           transform: isHorizontal
             ? `translateX(-${currentIndex * slidePercentage}%)`
-            : `translateY(-${currentIndex * 100 / totalSlides}%)`,
-          display: 'flex',
-          flexDirection: isHorizontal ? 'row' : 'column',
-          width: isHorizontal ? '100%' : '100%',
-          height: isHorizontal ? 'auto' : '100%',
-          transition: 'transform 0.3s ease-in-out',
+            : `translateY(-${(currentIndex * slideStep * 100) / totalSlides}%)`,
+          display: "flex",
+          flexDirection: isHorizontal ? "row" : "column",
+          width: isHorizontal ? "100%" : "100%",
+          height: isHorizontal ? "auto" : `${totalSlides * 100}%`,
+          transition: "transform 0.3s ease-in-out",
+          boxSizing: "border-box",
         }}
       >
         {children.map((child, index) => (
@@ -72,10 +97,12 @@ const Slider: React.FC<SliderProps> = ({
             key={index}
             visibleSlides={visibleSlides}
             style={{
-              flex: `0 0 ${slidePercentage}%`,
-              width: isHorizontal ? `${slidePercentage}%` : '100%',
-              height: isHorizontal ? 'auto' : `${100 / visibleSlides}%`,
-              boxSizing: 'border-box',
+              flex: isHorizontal ? `0 0 ${slidePercentage}%` : "1", // Remove flex-basis for vertical slides
+              width: isHorizontal ? `${slidePercentage}%` : "100%",
+              height: isHorizontal ? "auto" : `${100 / totalSlides}%`,
+              boxSizing: "border-box",
+              margin: "0",
+              padding: "0",
             }}
           >
             {child}
@@ -84,8 +111,13 @@ const Slider: React.FC<SliderProps> = ({
       </SlideTrack>
 
       {showArrows && (
-        <Arrow direction={isHorizontal ? 'right' : 'down'} arrowStyle={arrowStyle} arrowColor={arrowColor} onClick={goToNext}>
-          {isHorizontal ? '>' : '˅'}
+        <Arrow
+          direction={isHorizontal ? "right" : "down"}
+          arrowStyle={arrowStyle}
+          arrowColor={arrowColor}
+          onClick={goToNext}
+        >
+          {isHorizontal ? ">" : "˅"}
         </Arrow>
       )}
 
