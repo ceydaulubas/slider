@@ -1,7 +1,32 @@
 {
-  "name": "my-slider",
+  "name": "react-styled-slider-component",
   "version": "0.1.0",
-  "private": true,
+  "description": "A customizable React slider component built with react ts and styled-components.",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "slider",
+    "styled-components",
+    "typescript",
+    "component"
+  ],
+  "author": "Ceyda Ulubas",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceydaulubas/slider.git"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -17,11 +42,8 @@
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+  "devDependencies": {
+    "typescript": "^4.9.5"
   },
   "eslintConfig": {
     "extends": [
