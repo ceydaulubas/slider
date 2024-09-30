@@ -9,7 +9,7 @@ import {
 } from "./SliderStyles.styles";
 
 interface SliderProps {
-  children: React.ReactNode[];
+  children: React.ReactNode;
   visibleSlides?: number;
   showDots?: boolean;
   showArrows?: boolean;
@@ -31,9 +31,14 @@ const Slider: React.FC<SliderProps> = ({
   arrowStyle = "minimal",
   arrowColor = "black",
 }) => {
+  // Hooks must always be called unconditionally
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const totalSlides = children.length;
+  if (!children || React.Children.count(children) === 0) {
+    return null; // Return null if children is null, avoiding rendering anything
+  }
+
+  const totalSlides = React.Children.count(children); 
 
   // Maximum index value, preventing overflow when navigating through slides.
   const maxIndex = totalSlides - visibleSlides;
@@ -57,13 +62,13 @@ const Slider: React.FC<SliderProps> = ({
 
   const slidePercentage = isHorizontal
     ? 100 / visibleSlides
-    : 100 / totalSlides; 
+    : 100 / totalSlides;
 
   return (
     <SliderWrapper
-      direction={direction} 
+      direction={direction}
       style={{
-        height: isHorizontal ? "auto" : `${visibleSlides * 200}px`, 
+        height: isHorizontal ? "auto" : `${visibleSlides * 200}px`,
         display: isHorizontal ? "block" : "flex",
         flexDirection: isHorizontal ? "row" : "column",
       }}
@@ -92,12 +97,12 @@ const Slider: React.FC<SliderProps> = ({
           boxSizing: "border-box",
         }}
       >
-        {children.map((child, index) => (
+        {React.Children.map(children, (child, index) => (
           <Slide
             key={index}
             visibleSlides={visibleSlides}
             style={{
-              flex: isHorizontal ? `0 0 ${slidePercentage}%` : "1", // Remove flex-basis for vertical slides
+              flex: isHorizontal ? `0 0 ${slidePercentage}%` : "1",
               width: isHorizontal ? `${slidePercentage}%` : "100%",
               height: isHorizontal ? "auto" : `${100 / totalSlides}%`,
               boxSizing: "border-box",
