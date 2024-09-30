@@ -16,7 +16,7 @@ Here's how to use the slider component in your React application:
 
 ```tsx
 import React from 'react';
-import Slider from 'react-styled-slider-component';
+import {Slider} from 'react-styled-slider-component';
 
 const App: React.FC = () => {
   return (
