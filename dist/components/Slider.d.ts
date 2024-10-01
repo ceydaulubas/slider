@@ -1,6 +1,6 @@
 import React from "react";
 interface SliderProps {
-    children: React.ReactNode[];
+    children: React.ReactNode;
     visibleSlides?: number;
     showDots?: boolean;
     showArrows?: boolean;

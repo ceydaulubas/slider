@@ -10,12 +10,16 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState } from "react";
+import React, { useState } from "react";
 import { SliderWrapper, SlideTrack, Slide, DotsWrapper, Dot, Arrow, } from "./SliderStyles.styles";
 var Slider = function (_a) {
     var children = _a.children, _b = _a.visibleSlides, visibleSlides = _b === void 0 ? 1 : _b, _c = _a.showDots, showDots = _c === void 0 ? true : _c, _d = _a.showArrows, showArrows = _d === void 0 ? true : _d, _e = _a.dotsPosition, dotsPosition = _e === void 0 ? "bottom" : _e, _f = _a.slideStep, slideStep = _f === void 0 ? 1 : _f, _g = _a.direction, direction = _g === void 0 ? "horizontal" : _g, _h = _a.arrowStyle, arrowStyle = _h === void 0 ? "minimal" : _h, _j = _a.arrowColor, arrowColor = _j === void 0 ? "black" : _j;
+    // Hooks must always be called unconditionally
     var _k = useState(0), currentIndex = _k[0], setCurrentIndex = _k[1];
-    var totalSlides = children.length;
+    if (!children || React.Children.count(children) === 0) {
+        return null; // Return null if children is null, avoiding rendering anything
+    }
+    var totalSlides = React.Children.count(children);
     // Maximum index value, preventing overflow when navigating through slides.
     var maxIndex = totalSlides - visibleSlides;
     // Calculate the number of dots based on the total number of slides and the number of visible slides.
@@ -47,7 +51,7 @@ var Slider = function (_a) {
                     height: isHorizontal ? "auto" : "".concat(totalSlides * 100, "%"),
                     transition: "transform 0.3s ease-in-out",
                     boxSizing: "border-box",
-                } }, { children: children.map(function (child, index) { return (_jsx(Slide, __assign({ visibleSlides: visibleSlides, style: {
+                } }, { children: React.Children.map(children, function (child, index) { return (_jsx(Slide, __assign({ visibleSlides: visibleSlides, style: {
                         flex: isHorizontal ? "0 0 ".concat(slidePercentage, "%") : "1",
                         width: isHorizontal ? "".concat(slidePercentage, "%") : "100%",
                         height: isHorizontal ? "auto" : "".concat(100 / totalSlides, "%"),
