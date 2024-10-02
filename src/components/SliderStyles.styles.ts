@@ -27,17 +27,37 @@ export const Slide = styled.div<{ visibleSlides: number }>`
   padding: 0; 
 `;
 
-
-
 export const DotsWrapper = styled.div<{ position: 'top' | 'bottom' | 'left' | 'right' }>`
+  position: absolute;
   display: flex;
   justify-content: center;
   flex-direction: ${({ position }) => (position === 'left' || position === 'right' ? 'column' : 'row')};
-  margin-top: ${({ position }) => (position === 'top' ? '10px' : '0')};
-  margin-bottom: ${({ position }) => (position === 'bottom' ? '10px' : '0')};
-  margin-left: ${({ position }) => (position === 'left' ? '10px' : '0')};
-  margin-right: ${({ position }) => (position === 'right' ? '10px' : '0')};
+  
+  ${({ position }) => position === 'top' && `
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+  `}
+  
+  ${({ position }) => position === 'bottom' && `
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+  `}
+  
+  ${({ position }) => position === 'left' && `
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  `}
+  
+  ${({ position }) => position === 'right' && `
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  `}
 `;
+
 
 export const Dot = styled.div<{ active: boolean }>`
   width: 10px;
