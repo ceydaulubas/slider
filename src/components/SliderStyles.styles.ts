@@ -64,7 +64,7 @@ export const Dot = styled.div<{ active: boolean }>`
   height: 10px;
   border-radius: 50%;
   background-color: ${({ active }) => (active ? 'black' : 'lightgray')};
-  margin: 0 5px;
+  margin: 5px;
   cursor: pointer;
 `;
 export const Arrow = styled.div<{ direction: 'left' | 'right' | 'up' | 'down', arrowStyle: 'minimal' | 'filled' | 'outlined', arrowColor: 'black' | 'white' }>`
