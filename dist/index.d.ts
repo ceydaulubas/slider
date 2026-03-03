@@ -1,1 +1,1 @@
-export { default as Slider } from './components/Slider';
+import './index.css';

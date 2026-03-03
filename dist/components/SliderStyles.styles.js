@@ -12,23 +12,23 @@ export var SliderWrapper = styled.div(templateObject_1 || (templateObject_1 = __
 });
 export var SlideTrack = styled.div(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  display: flex;\n  transition: transform 0.3s ease-in-out;\n"], ["\n  display: flex;\n  transition: transform 0.3s ease-in-out;\n"])));
 export var Slide = styled.div(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n  width: 100%;\n  height: 100%;\n  box-sizing: border-box;\n  margin: 0; \n  padding: 0; \n"], ["\n  width: 100%;\n  height: 100%;\n  box-sizing: border-box;\n  margin: 0; \n  padding: 0; \n"])));
-export var DotsWrapper = styled.div(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n  display: flex;\n  justify-content: center;\n  flex-direction: ", ";\n  margin-top: ", ";\n  margin-bottom: ", ";\n  margin-left: ", ";\n  margin-right: ", ";\n"], ["\n  display: flex;\n  justify-content: center;\n  flex-direction: ", ";\n  margin-top: ", ";\n  margin-bottom: ", ";\n  margin-left: ", ";\n  margin-right: ", ";\n"])), function (_a) {
+export var DotsWrapper = styled.div(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n  position: absolute;\n  display: flex;\n  justify-content: center;\n  flex-direction: ", ";\n  \n  ", "\n  \n  ", "\n  \n  ", "\n  \n  ", "\n"], ["\n  position: absolute;\n  display: flex;\n  justify-content: center;\n  flex-direction: ", ";\n  \n  ", "\n  \n  ", "\n  \n  ", "\n  \n  ", "\n"])), function (_a) {
     var position = _a.position;
     return (position === 'left' || position === 'right' ? 'column' : 'row');
 }, function (_a) {
     var position = _a.position;
-    return (position === 'top' ? '10px' : '0');
+    return position === 'top' && "\n    top: 10px;\n    left: 50%;\n    transform: translateX(-50%);\n  ";
 }, function (_a) {
     var position = _a.position;
-    return (position === 'bottom' ? '10px' : '0');
+    return position === 'bottom' && "\n    bottom: 10px;\n    left: 50%;\n    transform: translateX(-50%);\n  ";
 }, function (_a) {
     var position = _a.position;
-    return (position === 'left' ? '10px' : '0');
+    return position === 'left' && "\n    left: 10px;\n    top: 50%;\n    transform: translateY(-50%);\n  ";
 }, function (_a) {
     var position = _a.position;
-    return (position === 'right' ? '10px' : '0');
+    return position === 'right' && "\n    right: 10px;\n    top: 50%;\n    transform: translateY(-50%);\n  ";
 });
-export var Dot = styled.div(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n  width: 10px;\n  height: 10px;\n  border-radius: 50%;\n  background-color: ", ";\n  margin: 0 5px;\n  cursor: pointer;\n"], ["\n  width: 10px;\n  height: 10px;\n  border-radius: 50%;\n  background-color: ", ";\n  margin: 0 5px;\n  cursor: pointer;\n"])), function (_a) {
+export var Dot = styled.div(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n  width: 10px;\n  height: 10px;\n  border-radius: 50%;\n  background-color: ", ";\n  margin: 5px;\n  cursor: pointer;\n"], ["\n  width: 10px;\n  height: 10px;\n  border-radius: 50%;\n  background-color: ", ";\n  margin: 5px;\n  cursor: pointer;\n"])), function (_a) {
     var active = _a.active;
     return (active ? 'black' : 'lightgray');
 });

@@ -3,24 +3,24 @@ import Slider from './components/Slider';
 
 const App: React.FC = () => {
   return (
-    <div>
-      <Slider
-        visibleSlides={2}
-        showDots={true}
-        showArrows={true}
-        dotsPosition="bottom"
-        slideStep={1}
-        direction="horizontal"
-        arrowStyle="minimal" 
-      >
-        <div style={{ backgroundColor: 'red', height: '200px' }}>Slide 1</div>
-        <div style={{ backgroundColor: 'blue', height: '200px' }}>Slide 2</div>
-        <div style={{ backgroundColor: 'green', height: '200px' }}>Slide 3</div>
-        <div style={{ backgroundColor: 'yellow', height: '200px' }}>Slide 4</div>
-        <div style={{ backgroundColor: 'red', height: '200px' }}>Slide 5</div>
-        <div style={{ backgroundColor: 'blue', height: '200px' }}>Slide 6</div>
-        <div style={{ backgroundColor: 'green', height: '200px' }}>Slide 7</div>
-        <div style={{ backgroundColor: 'yellow', height: '200px' }}>Slide 8</div>
+    <div style={{ padding: '50px' }}>
+      <h2>Yeni Nesil Slider (Compound Components)</h2>
+      
+      <Slider visibleSlides={3} direction="horizontal">
+        {/* Okları ve noktaları istediğimiz yere koyabiliriz */}
+        <Slider.Button type="prev" style="filled" />
+        
+        <Slider.Track>
+          <div style={{ backgroundColor: '#ccc', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Slide 1</div>
+          <div style={{ backgroundColor: '#bbb', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Slide 2</div>
+          <div style={{ backgroundColor: '#aaa', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Slide 3</div>
+          <div style={{ backgroundColor: '#999', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Slide 4</div>
+          <div style={{ backgroundColor: '#888', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Slide 5</div>
+        </Slider.Track>
+
+        <Slider.Button type="next" style="filled" />
+        
+        <Slider.Dots position="bottom" />
       </Slider>
     </div>
   );

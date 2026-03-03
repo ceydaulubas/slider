@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import {
   SliderWrapper,
   SlideTrack,
@@ -8,137 +8,174 @@ import {
   Arrow,
 } from "./SliderStyles.styles";
 
+// --- Context ---
+interface SliderContextProps {
+  currentIndex: number;
+  totalSlides: number;
+  visibleSlides: number;
+  direction: "horizontal" | "vertical";
+  goToNext: () => void;
+  goToPrev: () => void;
+  goToSlide: (index: number) => void;
+  slidePercentage: number;
+}
+
+const SliderContext = createContext<SliderContextProps | undefined>(undefined);
+
+export const useSlider = () => {
+  const context = useContext(SliderContext);
+  if (!context) {
+    throw new Error("Slider sub-components must be used within a <Slider />");
+  }
+  return context;
+};
+
+// --- Main Slider Component ---
 interface SliderProps {
   children: React.ReactNode;
   visibleSlides?: number;
-  showDots?: boolean;
-  showArrows?: boolean;
-  dotsPosition?: "top" | "bottom" | "left" | "right";
-  slideStep?: number;
   direction?: "horizontal" | "vertical";
-  arrowStyle?: "minimal" | "filled" | "outlined";
-  arrowColor?: "black" | "white";
+  initialIndex?: number;
 }
 
-const Slider: React.FC<SliderProps> = ({
+const SliderMain: React.FC<SliderProps> & {
+  Track: typeof SliderTrack;
+  Button: typeof SliderButton;
+  Dots: typeof SliderDots;
+} = ({
   children,
   visibleSlides = 1,
-  showDots = true,
-  showArrows = true,
-  dotsPosition = "bottom",
-  slideStep = 1,
   direction = "horizontal",
-  arrowStyle = "minimal",
-  arrowColor = "black",
+  initialIndex = 0,
 }) => {
-  // Hooks must always be called unconditionally
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const totalSlides = React.Children.count(children);
+  const maxIndex = Math.max(0, totalSlides - visibleSlides);
 
-  if (!children || React.Children.count(children) === 0) {
-    return null; // Return null if children is null, avoiding rendering anything
-  }
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => Math.min(prev + 1, maxIndex));
+  }, [maxIndex]);
 
-  const totalSlides = React.Children.count(children); 
+  const goToPrev = useCallback(() => {
+    setCurrentIndex((prev) => Math.max(prev - 1, 0));
+  }, []);
 
-  // Maximum index value, preventing overflow when navigating through slides.
-  const maxIndex = totalSlides - visibleSlides;
-
-  // Calculate the number of dots based on the total number of slides and the number of visible slides.
-  const numberOfDots = Math.ceil((totalSlides - visibleSlides + 1) / slideStep);
-
-  const isHorizontal = direction === "horizontal";
-
-  const goToNext = () => {
-    setCurrentIndex((prevIndex) => Math.min(prevIndex + slideStep, maxIndex));
-  };
-
-  const goToPrev = () => {
-    setCurrentIndex((prevIndex) => Math.max(prevIndex - slideStep, 0));
-  };
-
-  const goToSlide = (index: number) => {
+  const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
-  };
+  }, []);
 
-  const slidePercentage = isHorizontal
-    ? 100 / visibleSlides
-    : 100 / totalSlides;
+  const slidePercentage = useMemo(() => 100 / visibleSlides, [visibleSlides]);
+
+  const value = {
+    currentIndex,
+    totalSlides,
+    visibleSlides,
+    direction,
+    goToNext,
+    goToPrev,
+    goToSlide,
+    slidePercentage,
+  };
 
   return (
-    <SliderWrapper
-      direction={direction}
-      style={{
-        height: isHorizontal ? "auto" : `${visibleSlides * 200}px`,
-        display: isHorizontal ? "block" : "flex",
-        flexDirection: isHorizontal ? "row" : "column",
-      }}
-    >
-      {showArrows && (
-        <Arrow
-          direction={isHorizontal ? "left" : "up"}
-          arrowStyle={arrowStyle}
-          arrowColor={arrowColor}
-          onClick={goToPrev}
-        >
-          {isHorizontal ? "<" : "˄"}
-        </Arrow>
-      )}
+    <SliderContext.Provider value={value}>
+      <SliderWrapper direction={direction}>
+        {children}
+      </SliderWrapper>
+    </SliderContext.Provider>
+  );
+};
 
+// --- Sub-Components ---
+
+const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { currentIndex, direction, slidePercentage, totalSlides } = useSlider();
+  const isHorizontal = direction === "horizontal";
+
+  const transformValue = isHorizontal
+    ? `translateX(-${currentIndex * slidePercentage}%)`
+    : `translateY(-${(currentIndex * 100) / totalSlides}%)`;
+
+  return (
+    <div style={{ overflow: "hidden", width: "100%" }}>
       <SlideTrack
         style={{
-          transform: isHorizontal
-            ? `translateX(-${currentIndex * slidePercentage}%)`
-            : `translateY(-${(currentIndex * slideStep * 100) / totalSlides}%)`,
-          display: "flex",
+          transform: transformValue,
           flexDirection: isHorizontal ? "row" : "column",
-          width: isHorizontal ? "100%" : "100%",
-          height: isHorizontal ? "auto" : `${totalSlides * 100}%`,
+          display: "flex",
           transition: "transform 0.3s ease-in-out",
-          boxSizing: "border-box",
         }}
       >
         {React.Children.map(children, (child, index) => (
           <Slide
             key={index}
-            visibleSlides={visibleSlides}
+            visibleSlides={1} // context'ten gelen slidePercentage ile yönetiliyor
             style={{
               flex: isHorizontal ? `0 0 ${slidePercentage}%` : "1",
               width: isHorizontal ? `${slidePercentage}%` : "100%",
-              height: isHorizontal ? "auto" : `${100 / totalSlides}%`,
               boxSizing: "border-box",
-              margin: "0",
-              padding: "0",
             }}
           >
             {child}
           </Slide>
         ))}
       </SlideTrack>
-
-      {showArrows && (
-        <Arrow
-          direction={isHorizontal ? "right" : "down"}
-          arrowStyle={arrowStyle}
-          arrowColor={arrowColor}
-          onClick={goToNext}
-        >
-          {isHorizontal ? ">" : "˅"}
-        </Arrow>
-      )}
-
-      {showDots && (
-        <DotsWrapper position={dotsPosition}>
-          {Array.from({ length: numberOfDots }).map((_, index) => (
-            <Dot
-              key={index}
-              active={index * slideStep === currentIndex}
-              onClick={() => goToSlide(index * slideStep)}
-            />
-          ))}
-        </DotsWrapper>
-      )}
-    </SliderWrapper>
+    </div>
   );
 };
 
-export default Slider;
+interface ButtonProps {
+  type: "prev" | "next";
+  children?: React.ReactNode;
+  style?: "minimal" | "filled" | "outlined";
+}
+
+const SliderButton: React.FC<ButtonProps> = ({ type, children, style = "minimal" }) => {
+  const { goToNext, goToPrev, direction } = useSlider();
+  const isHorizontal = direction === "horizontal";
+
+  const handleClick = type === "next" ? goToNext : goToPrev;
+  
+  const defaultIcon = type === "next" 
+    ? (isHorizontal ? ">" : "˅") 
+    : (isHorizontal ? "<" : "˄");
+
+  return (
+    <Arrow
+      direction={type === "next" ? (isHorizontal ? "right" : "down") : (isHorizontal ? "left" : "up")}
+      arrowStyle={style}
+      arrowColor="black"
+      onClick={handleClick}
+    >
+      {children || defaultIcon}
+    </Arrow>
+  );
+};
+
+const SliderDots: React.FC<{ position?: "top" | "bottom" | "left" | "right" }> = ({ 
+  position = "bottom" 
+}) => {
+  const { totalSlides, visibleSlides, currentIndex, goToSlide } = useSlider();
+  const numberOfDots = totalSlides - visibleSlides + 1;
+
+  if (numberOfDots <= 1) return null;
+
+  return (
+    <DotsWrapper position={position}>
+      {Array.from({ length: numberOfDots }).map((_, index) => (
+        <Dot
+          key={index}
+          active={index === currentIndex}
+          onClick={() => goToSlide(index)}
+        />
+      ))}
+    </DotsWrapper>
+  );
+};
+
+// Bileşenleri ana nesneye bağlayalım
+SliderMain.Track = SliderTrack;
+SliderMain.Button = SliderButton;
+SliderMain.Dots = SliderDots;
+
+export default SliderMain;
