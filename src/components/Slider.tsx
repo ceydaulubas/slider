@@ -20,6 +20,7 @@ interface SliderContextProps {
   totalSlides: number;
   visibleSlides: number;
   direction: "horizontal" | "vertical";
+  infinite: boolean;
   goToNext: () => void;
   goToPrev: () => void;
   goToSlide: (index: number) => void;
@@ -42,6 +43,7 @@ interface SliderProps {
   visibleSlides?: number;
   direction?: "horizontal" | "vertical";
   initialIndex?: number;
+  infinite?: boolean;
 }
 
 const SliderMain: React.FC<SliderProps> & {
@@ -53,18 +55,31 @@ const SliderMain: React.FC<SliderProps> & {
   visibleSlides = 1,
   direction = "horizontal",
   initialIndex = 0,
+  infinite = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const totalSlides = React.Children.count(children);
   const maxIndex = Math.max(0, totalSlides - visibleSlides);
 
   const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => Math.min(prev + 1, maxIndex));
-  }, [maxIndex]);
+    setCurrentIndex((prev) => {
+      if (infinite) {
+        // Eğer sona geldiysek (maxIndex'i geçtiysek veya oradaysak), 0'a dön.
+        return prev >= maxIndex ? 0 : prev + 1;
+      }
+      return Math.min(prev + 1, maxIndex);
+    });
+  }, [maxIndex, infinite]);
 
   const goToPrev = useCallback(() => {
-    setCurrentIndex((prev) => Math.max(prev - 1, 0));
-  }, []);
+    setCurrentIndex((prev) => {
+      if (infinite) {
+        // Eğer baştaysak, en sona (maxIndex'e) git.
+        return prev <= 0 ? maxIndex : prev - 1;
+      }
+      return Math.max(prev - 1, 0);
+    });
+  }, [maxIndex, infinite]);
 
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
@@ -77,6 +92,7 @@ const SliderMain: React.FC<SliderProps> & {
     totalSlides,
     visibleSlides,
     direction,
+    infinite,
     goToNext,
     goToPrev,
     goToSlide,
