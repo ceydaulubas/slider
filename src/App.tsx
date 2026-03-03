@@ -4,7 +4,7 @@ import Slider from './components/Slider';
 const App: React.FC = () => {
   return (
     <div style={{ padding: '50px', maxWidth: '1200px', margin: '0 auto' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Profesyonel Yatay Slider</h2>
+      <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Professional Horizontal Slider</h2>
       
       <Slider 
         visibleSlides={1} 
@@ -14,8 +14,8 @@ const App: React.FC = () => {
         autoplaySpeed={3000}
         gap={20}
         breakpoints={{
-          768: { visibleSlides: 2 },  // Tablette 2
-          1024: { visibleSlides: 4 }  // Masaüstünde 4
+          768: { visibleSlides: 2 },  // 2 slides for tablet
+          1024: { visibleSlides: 4 }  // 4 slides for desktop
         }}
       >
         <Slider.Button type="prev" style="filled" />
@@ -64,8 +64,8 @@ const App: React.FC = () => {
       </Slider>
 
       <div style={{ marginTop: '50px', textAlign: 'center', color: '#666' }}>
-        <p>Masaüstünde 4, tablette 2, mobilde 1 resim görünür.</p>
-        <p>Slider'ı parmağınızla kaydırabilir veya okları kullanabilirsiniz.</p>
+        <p>4 slides for desktop, 2 for tablet, 1 for mobile.</p>
+        <p>You can swipe with your finger or use the arrows to navigate.</p>
       </div>
     </div>
   );
