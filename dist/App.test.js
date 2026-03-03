@@ -10,24 +10,17 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { render, screen } from '@testing-library/react';
-import Slider from './components/Slider';
-describe('Slider Component Test', function () {
-    // Adım 2: Slider bileşeniyle ilgili bir test
-    test('renders correct number of slider', function () {
+import { render, screen } from "@testing-library/react";
+import { Slider } from "./components/Slider";
+describe("Slider Component Test", function () {
+    // Step 2: Test for the Slider component
+    test("renders correct number of slides", function () {
         render(_jsxs(Slider, __assign({ visibleSlides: 1 }, { children: [_jsx("div", { children: "Slide 1" }), _jsx("div", { children: "Slide 2" }), _jsx("div", { children: "Slide 3" })] })));
-        // Ekranda görünen slide'ları seçiyoruz
+        // Selecting the slides by their text content
         var slide1 = screen.getByText("Slide 1");
         var slide2 = screen.getByText("Slide 2");
-        // // Expect: Slide'ların dokümanda olup olmadığını kontrol ediyoruz
-        // expect(slide1).toBeInTheDocument();
-        // test('arrows navigate slides correctly', () => {
-        //   render(
-        //     <Slider visibleSlides={1}>
-        //       <div>Slide 1</div>
-        //       <div>Slide 2</div>
-        //       <div>Slide 3</div>
-        //     </Slider>
-        //   );
+        // Expect: Checking if the slides are present in the document
+        expect(slide1).toBeInTheDocument();
+        expect(slide2).toBeInTheDocument();
     });
 });
