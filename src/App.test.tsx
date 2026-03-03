@@ -1,17 +1,16 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import Slider from './components/Slider';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { Slider } from "./components/Slider";
 
-describe('Slider Component Test', () => {
-
+describe("Slider Component Test", () => {
   // Step 2: Test for the Slider component
-  test('renders correct number of slides', () => {
+  test("renders correct number of slides", () => {
     render(
       <Slider visibleSlides={1}>
         <div>Slide 1</div>
         <div>Slide 2</div>
         <div>Slide 3</div>
-      </Slider>
+      </Slider>,
     );
 
     // Selecting the slides by their text content
