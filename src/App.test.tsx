@@ -1,11 +1,11 @@
 import React from 'react';
-import { render, screen , fireEvent} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import Slider from './components/Slider';
 
 describe('Slider Component Test', () => {
 
-  // Adım 2: Slider bileşeniyle ilgili bir test
-  test('renders correct number of slider', () => {
+  // Step 2: Test for the Slider component
+  test('renders correct number of slides', () => {
     render(
       <Slider visibleSlides={1}>
         <div>Slide 1</div>
@@ -14,22 +14,12 @@ describe('Slider Component Test', () => {
       </Slider>
     );
 
-    // Ekranda görünen slide'ları seçiyoruz
+    // Selecting the slides by their text content
     const slide1 = screen.getByText("Slide 1");
     const slide2 = screen.getByText("Slide 2");
 
-    // // Expect: Slide'ların dokümanda olup olmadığını kontrol ediyoruz
-    // expect(slide1).toBeInTheDocument();
-
-    // test('arrows navigate slides correctly', () => {
-    //   render(
-    //     <Slider visibleSlides={1}>
-    //       <div>Slide 1</div>
-    //       <div>Slide 2</div>
-    //       <div>Slide 3</div>
-    //     </Slider>
-    //   );
-
+    // Expect: Checking if the slides are present in the document
+    expect(slide1).toBeInTheDocument();
+    expect(slide2).toBeInTheDocument();
   });
 });
-
