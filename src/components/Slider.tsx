@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 import {
   SliderWrapper,
   SlideTrack,
@@ -44,6 +38,8 @@ interface SliderProps {
   direction?: "horizontal" | "vertical";
   initialIndex?: number;
   infinite?: boolean;
+  autoplay?: boolean;
+  autoplaySpeed?: number;
   breakpoints?: {
     [key: number]: {
       visibleSlides: number;
@@ -61,38 +57,35 @@ const SliderMain: React.FC<SliderProps> & {
   direction = "horizontal",
   initialIndex = 0,
   infinite = false,
+  autoplay = false,
+  autoplaySpeed = 3000,
   breakpoints,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [visibleSlides, setVisibleSlides] = useState(defaultVisibleSlides);
   const totalSlides = React.Children.count(children);
 
-  // Ekran genişliğine göre visibleSlides değerini güncelle
-  React.useEffect(() => {
-    if (!breakpoints) return;
-
+  // Responsive logic
+  useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       let activeVisibleSlides = defaultVisibleSlides;
 
       if (breakpoints) {
-        // Breakpoint'leri küçükten büyüğe sıralayalım
         const sortedBreakpoints = Object.keys(breakpoints)
           .map(Number)
           .sort((a, b) => a - b);
 
-        // En uygun (ekranın içinde kaldığı en büyük kuralı) bulalım
         for (const breakpoint of sortedBreakpoints) {
           if (width >= breakpoint) {
             activeVisibleSlides = breakpoints[breakpoint].visibleSlides;
           }
         }
       }
-
       setVisibleSlides(activeVisibleSlides);
     };
 
-    handleResize(); // İlk yüklemede çalıştır
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [breakpoints, defaultVisibleSlides]);
@@ -102,7 +95,6 @@ const SliderMain: React.FC<SliderProps> & {
   const goToNext = useCallback(() => {
     setCurrentIndex((prev) => {
       if (infinite) {
-        // Eğer sona geldiysek (maxIndex'i geçtiysek veya oradaysak), 0'a dön.
         return prev >= maxIndex ? 0 : prev + 1;
       }
       return Math.min(prev + 1, maxIndex);
@@ -112,7 +104,6 @@ const SliderMain: React.FC<SliderProps> & {
   const goToPrev = useCallback(() => {
     setCurrentIndex((prev) => {
       if (infinite) {
-        // Eğer baştaysak, en sona (maxIndex'e) git.
         return prev <= 0 ? maxIndex : prev - 1;
       }
       return Math.max(prev - 1, 0);
@@ -122,6 +113,15 @@ const SliderMain: React.FC<SliderProps> & {
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
   }, []);
+
+  // Autoplay logic
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (autoplay) {
+      interval = setInterval(goToNext, autoplaySpeed);
+    }
+    return () => clearInterval(interval);
+  }, [autoplay, autoplaySpeed, goToNext]);
 
   const slidePercentage = useMemo(() => 100 / visibleSlides, [visibleSlides]);
 
@@ -139,7 +139,9 @@ const SliderMain: React.FC<SliderProps> & {
 
   return (
     <SliderContext.Provider value={value}>
-      <SliderWrapper direction={direction}>{children}</SliderWrapper>
+      <SliderWrapper direction={direction}>
+        {children}
+      </SliderWrapper>
     </SliderContext.Provider>
   );
 };
@@ -147,51 +149,30 @@ const SliderMain: React.FC<SliderProps> & {
 // --- Sub-Components ---
 
 const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const {
-    currentIndex,
-    direction,
-    slidePercentage,
-    totalSlides,
-    goToNext,
-    goToPrev,
-  } = useSlider();
+  const { currentIndex, direction, slidePercentage, goToNext, goToPrev } = useSlider();
   const isHorizontal = direction === "horizontal";
-  const [touchStart, setTouchStart] = React.useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
-
-  // Kaydırma hassasiyeti (piksel cinsinden)
-  const minSwipeDistance = 50;
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart(
-      isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY,
-    );
+    setTouchStart(isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(
-      isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY,
-    );
+    setTouchEnd(isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY);
   };
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      goToNext();
-    } else if (isRightSwipe) {
-      goToPrev();
-    }
+    if (distance > 50) goToNext();
+    else if (distance < -50) goToPrev();
   };
 
   const transformValue = isHorizontal
     ? `translateX(-${currentIndex * slidePercentage}%)`
-    : `translateY(-${(currentIndex * 100) / totalSlides}%)`;
+    : `translateY(-${currentIndex * slidePercentage}%)`;
 
   return (
     <div style={{ overflow: "hidden", width: "100%" }}>
@@ -211,9 +192,9 @@ const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             key={index}
             visibleSlides={1}
             style={{
-              flex: isHorizontal ? `0 0 ${slidePercentage}%` : "1",
+              flex: `0 0 ${slidePercentage}%`,
               width: isHorizontal ? `${slidePercentage}%` : "100%",
-              boxSizing: "border-box",
+              height: isHorizontal ? "auto" : `${slidePercentage}%`,
             }}
           >
             {child}
@@ -230,30 +211,15 @@ interface ButtonProps {
   style?: "minimal" | "filled" | "outlined";
 }
 
-const SliderButton: React.FC<ButtonProps> = ({
-  type,
-  children,
-  style = "minimal",
-}) => {
+const SliderButton: React.FC<ButtonProps> = ({ type, children, style = "minimal" }) => {
   const { goToNext, goToPrev, direction } = useSlider();
   const isHorizontal = direction === "horizontal";
-
   const handleClick = type === "next" ? goToNext : goToPrev;
-
-  const defaultIcon =
-    type === "next" ? (isHorizontal ? ">" : "˅") : isHorizontal ? "<" : "˄";
+  const defaultIcon = type === "next" ? (isHorizontal ? ">" : "˅") : (isHorizontal ? "<" : "˄");
 
   return (
     <Arrow
-      direction={
-        type === "next"
-          ? isHorizontal
-            ? "right"
-            : "down"
-          : isHorizontal
-            ? "left"
-            : "up"
-      }
+      direction={type === "next" ? (isHorizontal ? "right" : "down") : (isHorizontal ? "left" : "up")}
       arrowStyle={style}
       arrowColor="black"
       onClick={handleClick}
@@ -263,28 +229,20 @@ const SliderButton: React.FC<ButtonProps> = ({
   );
 };
 
-const SliderDots: React.FC<{
-  position?: "top" | "bottom" | "left" | "right";
-}> = ({ position = "bottom" }) => {
+const SliderDots: React.FC<{ position?: "top" | "bottom" | "left" | "right" }> = ({ position = "bottom" }) => {
   const { totalSlides, visibleSlides, currentIndex, goToSlide } = useSlider();
   const numberOfDots = totalSlides - visibleSlides + 1;
-
   if (numberOfDots <= 1) return null;
 
   return (
     <DotsWrapper position={position}>
       {Array.from({ length: numberOfDots }).map((_, index) => (
-        <Dot
-          key={index}
-          active={index === currentIndex}
-          onClick={() => goToSlide(index)}
-        />
+        <Dot key={index} active={index === currentIndex} onClick={() => goToSlide(index)} />
       ))}
     </DotsWrapper>
   );
 };
 
-// Bileşenleri ana nesneye bağlayalım
 SliderMain.Track = SliderTrack;
 SliderMain.Button = SliderButton;
 SliderMain.Dots = SliderDots;

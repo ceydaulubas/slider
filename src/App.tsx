@@ -10,6 +10,8 @@ const App: React.FC = () => {
         visibleSlides={1} 
         direction="horizontal" 
         infinite={true}
+        autoplay={true}
+        autoplaySpeed={2000}
         breakpoints={{
           768: { visibleSlides: 2 },  // Tablette 2
           1024: { visibleSlides: 4 }  // Masaüstünde 4

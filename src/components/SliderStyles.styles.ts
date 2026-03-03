@@ -16,15 +16,18 @@ export const SliderWrapper = styled.div<{ direction: 'horizontal' | 'vertical' }
 export const SlideTrack = styled.div`
   display: flex;
   transition: transform 0.3s ease-in-out;
+  width: 100%;
+  height: 100%;
 `;
 
 
 export const Slide = styled.div<{ visibleSlides: number }>`
+  box-sizing: border-box;
+  flex-shrink: 0; // Slaytların asla sıkışmamasını sağlar
+  margin: 0; 
+  padding: 0;
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
-  margin: 0; 
-  padding: 0; 
 `;
 
 export const DotsWrapper = styled.div<{ position: 'top' | 'bottom' | 'left' | 'right' }>`
