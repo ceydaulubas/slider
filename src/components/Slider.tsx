@@ -68,17 +68,19 @@ const SliderMain: React.FC<SliderProps> & {
   const [visibleSlides, setVisibleSlides] = useState(defaultVisibleSlides);
   const totalSlides = React.Children.count(children);
 
-  // Responsive logic
+  // Responsive logic: update visibleSlides based on screen width
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       let activeVisibleSlides = defaultVisibleSlides;
 
       if (breakpoints) {
+        // Sort breakpoints in ascending order
         const sortedBreakpoints = Object.keys(breakpoints)
           .map(Number)
           .sort((a, b) => a - b);
 
+        // Find the best matching breakpoint for the current width
         for (const breakpoint of sortedBreakpoints) {
           if (width >= breakpoint) {
             activeVisibleSlides = breakpoints[breakpoint].visibleSlides;
@@ -88,36 +90,42 @@ const SliderMain: React.FC<SliderProps> & {
       setVisibleSlides(activeVisibleSlides);
     };
 
-    handleResize();
+    handleResize(); // Initial check on mount
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [breakpoints, defaultVisibleSlides]);
 
+  // Calculate the maximum scrollable index
   const maxIndex = useMemo(() => Math.max(0, totalSlides - visibleSlides), [totalSlides, visibleSlides]);
 
+  // Navigate to the next slide
   const goToNext = useCallback(() => {
     setCurrentIndex((prev) => {
       if (infinite) {
+        // Loop back to start if at the end in infinite mode
         return prev >= maxIndex ? 0 : prev + 1;
       }
       return Math.min(prev + 1, maxIndex);
     });
   }, [maxIndex, infinite]);
 
+  // Navigate to the previous slide
   const goToPrev = useCallback(() => {
     setCurrentIndex((prev) => {
       if (infinite) {
+        // Loop back to the end if at the start in infinite mode
         return prev <= 0 ? maxIndex : prev - 1;
       }
       return Math.max(prev - 1, 0);
     });
   }, [maxIndex, infinite]);
 
+  // Directly navigate to a specific slide index
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
   }, []);
 
-  // Autoplay logic
+  // Autoplay logic: automatically slide at a set interval
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (autoplay) {
@@ -126,6 +134,7 @@ const SliderMain: React.FC<SliderProps> & {
     return () => clearInterval(interval);
   }, [autoplay, autoplaySpeed, goToNext]);
 
+  // Percentage width/height for each slide
   const slidePercentage = useMemo(() => 100 / visibleSlides, [visibleSlides]);
 
   const value = {
@@ -158,6 +167,7 @@ const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
+  // Swipe support: tracking touch start and move positions
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY);
@@ -170,10 +180,13 @@ const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
-    if (distance > 50) goToNext();
-    else if (distance < -50) goToPrev();
+    const minSwipeDistance = 50; // Minimum distance to trigger a swipe
+
+    if (distance > minSwipeDistance) goToNext();
+    else if (distance < -minSwipeDistance) goToPrev();
   };
 
+  // CSS transform value for sliding
   const transformValue = isHorizontal
     ? `translateX(-${currentIndex * slidePercentage}%)`
     : `translateY(-${currentIndex * slidePercentage}%)`;
@@ -222,6 +235,8 @@ const SliderButton: React.FC<ButtonProps> = ({ type, children, style = "minimal"
   const { goToNext, goToPrev, direction } = useSlider();
   const isHorizontal = direction === "horizontal";
   const handleClick = type === "next" ? goToNext : goToPrev;
+  
+  // Default icons for next/prev depending on direction
   const defaultIcon = type === "next" ? (isHorizontal ? ">" : "˅") : (isHorizontal ? "<" : "˄");
 
   return (
@@ -250,6 +265,7 @@ const SliderDots: React.FC<{ position?: "top" | "bottom" | "left" | "right" }> =
   );
 };
 
+// Attach sub-components to the main Slider component
 SliderMain.Track = SliderTrack;
 SliderMain.Button = SliderButton;
 SliderMain.Dots = SliderDots;

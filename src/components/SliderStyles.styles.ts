@@ -23,7 +23,7 @@ export const SlideTrack = styled.div`
 
 export const Slide = styled.div<{ visibleSlides: number }>`
   box-sizing: border-box;
-  flex-shrink: 0; // Slaytların asla sıkışmamasını sağlar
+  flex-shrink: 0; // Prevents slides from shrinking in flex container
   margin: 0; 
   padding: 0;
   width: 100%;
@@ -83,11 +83,11 @@ export const Arrow = styled.div<{ direction: 'left' | 'right' | 'up' | 'down', a
   z-index: 1;
   user-select: none;
 
-  // Horizontal arrows
+  // Horizontal arrows positioning
   ${({ direction }) => direction === 'left' && 'left: 10px; top: 50%; transform: translateY(-50%);'}
   ${({ direction }) => direction === 'right' && 'right: 10px; top: 50%; transform: translateY(-50%);'}
 
-  // Vertical arrows
+  // Vertical arrows positioning
   ${({ direction }) => direction === 'up' && 'top: 10px; left: 50%; transform: translateX(-50%);'}
   ${({ direction }) => direction === 'down' && 'bottom: 10px; left: 50%; transform: translateX(-50%);'}
 
@@ -97,7 +97,7 @@ export const Arrow = styled.div<{ direction: 'left' | 'right' | 'up' | 'down', a
     border: none;
   `}
 
-  // Filled style: solid background and white arrow
+  // Filled style: solid background with contrasting arrow color
   ${({ arrowStyle, arrowColor }) => arrowStyle === 'filled' && `
     background-color: ${arrowColor === 'white' ? 'white' : 'black'};
     color: ${arrowColor === 'white' ? 'black' : 'white'};
