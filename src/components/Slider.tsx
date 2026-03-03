@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   SliderWrapper,
   SlideTrack,
@@ -79,9 +85,7 @@ const SliderMain: React.FC<SliderProps> & {
 
   return (
     <SliderContext.Provider value={value}>
-      <SliderWrapper direction={direction}>
-        {children}
-      </SliderWrapper>
+      <SliderWrapper direction={direction}>{children}</SliderWrapper>
     </SliderContext.Provider>
   );
 };
@@ -89,8 +93,47 @@ const SliderMain: React.FC<SliderProps> & {
 // --- Sub-Components ---
 
 const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentIndex, direction, slidePercentage, totalSlides } = useSlider();
+  const {
+    currentIndex,
+    direction,
+    slidePercentage,
+    totalSlides,
+    goToNext,
+    goToPrev,
+  } = useSlider();
   const isHorizontal = direction === "horizontal";
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+
+  // Kaydırma hassasiyeti (piksel cinsinden)
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(
+      isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY,
+    );
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(
+      isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY,
+    );
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      goToNext();
+    } else if (isRightSwipe) {
+      goToPrev();
+    }
+  };
 
   const transformValue = isHorizontal
     ? `translateX(-${currentIndex * slidePercentage}%)`
@@ -99,6 +142,9 @@ const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div style={{ overflow: "hidden", width: "100%" }}>
       <SlideTrack
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
         style={{
           transform: transformValue,
           flexDirection: isHorizontal ? "row" : "column",
@@ -109,7 +155,7 @@ const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {React.Children.map(children, (child, index) => (
           <Slide
             key={index}
-            visibleSlides={1} // context'ten gelen slidePercentage ile yönetiliyor
+            visibleSlides={1}
             style={{
               flex: isHorizontal ? `0 0 ${slidePercentage}%` : "1",
               width: isHorizontal ? `${slidePercentage}%` : "100%",
@@ -130,19 +176,30 @@ interface ButtonProps {
   style?: "minimal" | "filled" | "outlined";
 }
 
-const SliderButton: React.FC<ButtonProps> = ({ type, children, style = "minimal" }) => {
+const SliderButton: React.FC<ButtonProps> = ({
+  type,
+  children,
+  style = "minimal",
+}) => {
   const { goToNext, goToPrev, direction } = useSlider();
   const isHorizontal = direction === "horizontal";
 
   const handleClick = type === "next" ? goToNext : goToPrev;
-  
-  const defaultIcon = type === "next" 
-    ? (isHorizontal ? ">" : "˅") 
-    : (isHorizontal ? "<" : "˄");
+
+  const defaultIcon =
+    type === "next" ? (isHorizontal ? ">" : "˅") : isHorizontal ? "<" : "˄";
 
   return (
     <Arrow
-      direction={type === "next" ? (isHorizontal ? "right" : "down") : (isHorizontal ? "left" : "up")}
+      direction={
+        type === "next"
+          ? isHorizontal
+            ? "right"
+            : "down"
+          : isHorizontal
+            ? "left"
+            : "up"
+      }
       arrowStyle={style}
       arrowColor="black"
       onClick={handleClick}
@@ -152,9 +209,9 @@ const SliderButton: React.FC<ButtonProps> = ({ type, children, style = "minimal"
   );
 };
 
-const SliderDots: React.FC<{ position?: "top" | "bottom" | "left" | "right" }> = ({ 
-  position = "bottom" 
-}) => {
+const SliderDots: React.FC<{
+  position?: "top" | "bottom" | "left" | "right";
+}> = ({ position = "bottom" }) => {
   const { totalSlides, visibleSlides, currentIndex, goToSlide } = useSlider();
   const numberOfDots = totalSlides - visibleSlides + 1;
 
