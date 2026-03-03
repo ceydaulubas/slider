@@ -11,7 +11,8 @@ const App: React.FC = () => {
         direction="horizontal" 
         infinite={true}
         autoplay={true}
-        autoplaySpeed={2000}
+        autoplaySpeed={3000}
+        gap={20}
         breakpoints={{
           768: { visibleSlides: 2 },  // Tablette 2
           1024: { visibleSlides: 4 }  // Masaüstünde 4

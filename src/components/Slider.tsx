@@ -15,6 +15,7 @@ interface SliderContextProps {
   visibleSlides: number;
   direction: "horizontal" | "vertical";
   infinite: boolean;
+  gap: number;
   goToNext: () => void;
   goToPrev: () => void;
   goToSlide: (index: number) => void;
@@ -40,6 +41,7 @@ interface SliderProps {
   infinite?: boolean;
   autoplay?: boolean;
   autoplaySpeed?: number;
+  gap?: number;
   breakpoints?: {
     [key: number]: {
       visibleSlides: number;
@@ -59,6 +61,7 @@ const SliderMain: React.FC<SliderProps> & {
   infinite = false,
   autoplay = false,
   autoplaySpeed = 3000,
+  gap = 0,
   breakpoints,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -131,6 +134,7 @@ const SliderMain: React.FC<SliderProps> & {
     visibleSlides,
     direction,
     infinite,
+    gap,
     goToNext,
     goToPrev,
     goToSlide,
@@ -149,7 +153,7 @@ const SliderMain: React.FC<SliderProps> & {
 // --- Sub-Components ---
 
 const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentIndex, direction, slidePercentage, goToNext, goToPrev } = useSlider();
+  const { currentIndex, direction, slidePercentage, gap, goToNext, goToPrev } = useSlider();
   const isHorizontal = direction === "horizontal";
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -185,6 +189,7 @@ const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           flexDirection: isHorizontal ? "row" : "column",
           display: "flex",
           transition: "transform 0.3s ease-in-out",
+          margin: isHorizontal ? `0 -${gap / 2}px` : `-${gap / 2}px 0`,
         }}
       >
         {React.Children.map(children, (child, index) => (
@@ -195,6 +200,8 @@ const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               flex: `0 0 ${slidePercentage}%`,
               width: isHorizontal ? `${slidePercentage}%` : "100%",
               height: isHorizontal ? "auto" : `${slidePercentage}%`,
+              padding: isHorizontal ? `0 ${gap / 2}px` : `${gap / 2}px 0`,
+              boxSizing: "border-box",
             }}
           >
             {child}
