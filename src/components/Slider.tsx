@@ -44,6 +44,11 @@ interface SliderProps {
   direction?: "horizontal" | "vertical";
   initialIndex?: number;
   infinite?: boolean;
+  breakpoints?: {
+    [key: number]: {
+      visibleSlides: number;
+    };
+  };
 }
 
 const SliderMain: React.FC<SliderProps> & {
@@ -52,14 +57,47 @@ const SliderMain: React.FC<SliderProps> & {
   Dots: typeof SliderDots;
 } = ({
   children,
-  visibleSlides = 1,
+  visibleSlides: defaultVisibleSlides = 1,
   direction = "horizontal",
   initialIndex = 0,
   infinite = false,
+  breakpoints,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [visibleSlides, setVisibleSlides] = useState(defaultVisibleSlides);
   const totalSlides = React.Children.count(children);
-  const maxIndex = Math.max(0, totalSlides - visibleSlides);
+
+  // Ekran genişliğine göre visibleSlides değerini güncelle
+  React.useEffect(() => {
+    if (!breakpoints) return;
+
+    const handleResize = () => {
+      const width = window.innerWidth;
+      let activeVisibleSlides = defaultVisibleSlides;
+
+      if (breakpoints) {
+        // Breakpoint'leri küçükten büyüğe sıralayalım
+        const sortedBreakpoints = Object.keys(breakpoints)
+          .map(Number)
+          .sort((a, b) => a - b);
+
+        // En uygun (ekranın içinde kaldığı en büyük kuralı) bulalım
+        for (const breakpoint of sortedBreakpoints) {
+          if (width >= breakpoint) {
+            activeVisibleSlides = breakpoints[breakpoint].visibleSlides;
+          }
+        }
+      }
+
+      setVisibleSlides(activeVisibleSlides);
+    };
+
+    handleResize(); // İlk yüklemede çalıştır
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [breakpoints, defaultVisibleSlides]);
+
+  const maxIndex = useMemo(() => Math.max(0, totalSlides - visibleSlides), [totalSlides, visibleSlides]);
 
   const goToNext = useCallback(() => {
     setCurrentIndex((prev) => {

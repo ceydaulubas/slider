@@ -6,7 +6,15 @@ const App: React.FC = () => {
     <div style={{ padding: '50px' }}>
       <h2>Yeni Nesil Slider (Compound Components)</h2>
       
-      <Slider visibleSlides={3} direction="horizontal" infinite={true}>
+      <Slider 
+        visibleSlides={1} 
+        direction="horizontal" 
+        infinite={true}
+        breakpoints={{
+          768: { visibleSlides: 2 },  // Tablette 2
+          1024: { visibleSlides: 4 }  // Masaüstünde 4
+        }}
+      >
         {/* Okları ve noktaları istediğimiz yere koyabiliriz */}
         <Slider.Button type="prev" style="filled" />
         
