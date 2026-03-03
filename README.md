@@ -1,74 +1,142 @@
-# React Styled Slider Component
+# react-styled-slider-component
 
-A customizable and reusable slider component built with React and styled-components. This component allows developers to easily implement a slider/carousel with various configuration options, such as the number of visible slides, navigation arrows, dots, and different directions.
+A highly customizable, responsive React slider component built with TypeScript and Styled Components.
 
-## Installation
+## 🚀 Features
 
-To install the package, use npm or yarn:
+- **Compound Components:** Full control over slider layout (`Slider.Track`, `Slider.Button`, `Slider.Dots`).
+- **Responsive Breakpoints:** Easily adjust visible slides for Mobile, Tablet, and Desktop.
+- **Touch & Swipe Support:** Native feel on mobile devices.
+- **Infinite Loop:** Seamless back-to-start navigation.
+- **Autoplay:** Smart timer with pause on interaction.
+- **Customizable Arrows:** Multiple styles (`minimal`, `filled`, `outlined`, `plain`) and custom icons.
+- **Gap Support:** Add consistent spacing between slides.
+- **TypeScript Ready:** Fully typed for a better developer experience.
+
+## 📦 Installation
 
 ```bash
 npm install react-styled-slider-component
+# or
+yarn add react-styled-slider-component
 ```
 
-## Usage
+## 🛠 Usage Examples
 
-Here's how to use the slider component in your React application:
+### 1. Full Width Hero Slider (Autoplay)
+
+Perfect for landing pages. Shows one large image at a time.
+
+<img src= "https://res.cloudinary.com/dxqyvjf5r/image/upload/v1772570316/npm%20package/full_width_slider_v2vcbh.png"/>
 
 ```tsx
-import React from 'react';
-import {Slider} from 'react-styled-slider-component';
+import { Slider } from "react-styled-slider-component";
 
-const App: React.FC = () => {
-  return (
-    <div>
-      <Slider
-        visibleSlides={2}
-        showDots={true}
-        showArrows={true}
-        dotsPosition="bottom"
-        slideStep={1}
-        direction="horizontal"
-        arrowStyle="minimal"
-      >
-        <div style={{ backgroundColor: 'red', height: '200px' }}>Slide 1</div>
-        <div style={{ backgroundColor: 'blue', height: '200px' }}>Slide 2</div>
-        <div style={{ backgroundColor: 'green', height: '200px' }}>Slide 3</div>
-        <div style={{ backgroundColor: 'yellow', height: '200px' }}>Slide 4</div>
-        <div style={{ backgroundColor: 'red', height: '200px' }}>Slide 5</div>
-        <div style={{ backgroundColor: 'blue', height: '200px' }}>Slide 6</div>
-        <div style={{ backgroundColor: 'green', height: '200px' }}>Slide 7</div>
-        <div style={{ backgroundColor: 'yellow', height: '200px' }}>Slide 8</div>
-      </Slider>
-    </div>
-  );
-};
-
-export default App;
+const HeroSlider = () => (
+  <Slider
+    visibleSlides={1}
+    infinite={true}
+    autoplay={true}
+    autoplaySpeed={4000}
+  >
+    <Slider.Button type="prev" style="minimal" />
+    <Slider.Track>
+      <div style={{ height: "400px" }}>
+        <img
+          src="image1.jpg"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </div>
+      <div style={{ height: "400px" }}>
+        <img
+          src="image2.jpg"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </div>
+    </Slider.Track>
+    <Slider.Button type="next" style="minimal" />
+    <Slider.Dots position="bottom" />
+  </Slider>
+);
 ```
 
-## Props
+### 2. Multi-Item Responsive Carousel
 
-The `Slider` component accepts the following props:
+Shows multiple items at once and adjusts automatically based on screen size.
+<img src= "https://res.cloudinary.com/dxqyvjf5r/image/upload/v1772570315/npm%20package/multi_Item_slider_ittwfh.png"/>
 
-| Prop Name       | Type                                               | Default   | Description                                                                 |
-| --------------- | -------------------------------------------------- | --------- | --------------------------------------------------------------------------- |
-| `children`      | `React.ReactNode[]`                                | -         | The slides to be displayed in the slider.                                   |
-| `visibleSlides` | `number`                                           | `1`       | Number of slides visible at one time.                                       |
-| `showDots`      | `boolean`                                          | `true`    | Whether to show navigation dots below the slider.                           |
-| `showArrows`    | `boolean`                                          | `true`    | Whether to show navigation arrows on the slider.                            |
-| `dotsPosition`  | `'top' ,'bottom' , 'left' , 'right'`              | `'bottom'` | Position of the navigation dots.                                            |
-| `slideStep`     | `number`                                           | `1`       | Number of slides to move on each navigation action.                         |
-| `direction`     | `'horizontal' , 'vertical'`                        | `'horizontal'` | Direction of the slider, either horizontal or vertical.                    |
-| `arrowStyle`    | `'minimal' , 'filled' , 'outlined'`                | `'minimal'` | Style of the navigation arrows.                                             |
-| `arrowColor`    | `'black' , 'white'`                                | `'black'` | Color of the navigation arrows.                                             |
+```tsx
+const Carousel = () => (
+  <Slider
+    visibleSlides={1}
+    infinite={true}
+    gap={20}
+    breakpoints={{
+      768: { visibleSlides: 2 },
+      1024: { visibleSlides: 4 },
+    }}
+  >
+    <Slider.Button type="prev" style="filled" />
+    <Slider.Track>
+      <div style={{ height: "200px", background: "#FFD700" }}>Item 1</div>
+      <div style={{ height: "200px", background: "#FF8C00" }}>Item 2</div>
+      <div style={{ height: "200px", background: "#FF4500" }}>Item 3</div>
+      <div style={{ height: "200px", background: "#FF0000" }}>Item 4</div>
+      <div style={{ height: "200px", background: "#C71585" }}>Item 5</div>
+    </Slider.Track>
+    <Slider.Button type="next" style="filled" />
+    <Slider.Dots position="bottom" />
+  </Slider>
+);
+```
 
+### 3. Vertical Slider
 
-## Customization
+Slides items from bottom to top. Ideal for sidebars or vertical lists.
 
-The slider component uses `styled-components` for styling, making it highly customizable. You can override the styles by extending the styled components used in the slider.
+<img src= "https://res.cloudinary.com/dxqyvjf5r/image/upload/v1772570316/npm%20package/vertical_slider_oagp8i.png"/>
 
-## Contributing
+```tsx
+const VerticalSlider = () => (
+  <div style={{ height: "500px" }}>
+    <Slider direction="vertical" visibleSlides={2} infinite={true} gap={10}>
+      <Slider.Button type="prev" style="outlined" />
+      <Slider.Track>
+        <div style={{ height: "200px", background: "#f0f0f0" }}>Vertical 1</div>
+        <div style={{ height: "200px", background: "#e0e0e0" }}>Vertical 2</div>
+        <div style={{ height: "200px", background: "#d0d0d0" }}>Vertical 3</div>
+      </Slider.Track>
+      <Slider.Button type="next" style="outlined" />
+      <Slider.Dots position="right" />
+    </Slider>
+  </div>
+);
+```
 
-Contributions are welcome! Please open an issue or submit a pull request if you have any suggestions or improvements.
+## ⚙️ Props
 
+### Slider (Main Container)
 
+| Prop            | Type                         | Default        | Description                                               |
+| :-------------- | :--------------------------- | :------------- | :-------------------------------------------------------- |
+| `visibleSlides` | `number`                     | `1`            | Number of slides to show at once.                         |
+| `direction`     | `'horizontal' \| 'vertical'` | `'horizontal'` | Sliding orientation.                                      |
+| `infinite`      | `boolean`                    | `false`        | Enable infinite looping.                                  |
+| `autoplay`      | `boolean`                    | `false`        | Automatically transition slides.                          |
+| `autoplaySpeed` | `number`                     | `3000`         | Delay in ms for autoplay.                                 |
+| `gap`           | `number`                     | `0`            | Spacing between slides in pixels.                         |
+| `breakpoints`   | `object`                     | `undefined`    | Responsive rules (e.g., `{ 768: { visibleSlides: 2 } }`). |
+
+### Slider.Button
+
+| Prop       | Type                                             | Default       | Description                            |
+| :--------- | :----------------------------------------------- | :------------ | :------------------------------------- |
+| `type`     | `'prev' \| 'next'`                               | **Required**  | Direction of the button.               |
+| `style`    | `'minimal' \| 'filled' \| 'outlined' \| 'plain'` | `'minimal'`   | Visual style of the button.            |
+| `children` | `ReactNode`                                      | Default Icons | Custom text or icon inside the button. |
+
+### Slider.Dots
+
+| Prop       | Type                                     | Default    | Description                   |
+| :--------- | :--------------------------------------- | :--------- | :---------------------------- |
+| `position` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Placement of navigation dots. |
