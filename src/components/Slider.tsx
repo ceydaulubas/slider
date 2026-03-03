@@ -16,10 +16,10 @@ interface SliderContextProps {
   direction: "horizontal" | "vertical";
   infinite: boolean;
   gap: number;
+  setTotalSlides: (count: number) => void; // Added to update total slides from Track
   goToNext: () => void;
   goToPrev: () => void;
   goToSlide: (index: number) => void;
-  slidePercentage: number;
 }
 
 const SliderContext = createContext<SliderContextProps | undefined>(undefined);
@@ -66,95 +66,47 @@ const SliderMain: React.FC<SliderProps> & {
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [visibleSlides, setVisibleSlides] = useState(defaultVisibleSlides);
-  const totalSlides = React.Children.count(children);
+  const [totalSlides, setTotalSlides] = useState(0);
 
-  // Responsive logic: update visibleSlides based on screen width
+  // Responsive logic
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       let activeVisibleSlides = defaultVisibleSlides;
-
       if (breakpoints) {
-        // Sort breakpoints in ascending order
-        const sortedBreakpoints = Object.keys(breakpoints)
-          .map(Number)
-          .sort((a, b) => a - b);
-
-        // Find the best matching breakpoint for the current width
-        for (const breakpoint of sortedBreakpoints) {
-          if (width >= breakpoint) {
-            activeVisibleSlides = breakpoints[breakpoint].visibleSlides;
-          }
+        const sorted = Object.keys(breakpoints).map(Number).sort((a, b) => a - b);
+        for (const b of sorted) {
+          if (width >= b) activeVisibleSlides = breakpoints[b].visibleSlides;
         }
       }
       setVisibleSlides(activeVisibleSlides);
     };
-
-    handleResize(); // Initial check on mount
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [breakpoints, defaultVisibleSlides]);
 
-  // Calculate the maximum scrollable index
   const maxIndex = useMemo(() => Math.max(0, totalSlides - visibleSlides), [totalSlides, visibleSlides]);
 
-  // Navigate to the next slide
   const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => {
-      if (infinite) {
-        // Loop back to start if at the end in infinite mode
-        return prev >= maxIndex ? 0 : prev + 1;
-      }
-      return Math.min(prev + 1, maxIndex);
-    });
+    setCurrentIndex((prev) => (infinite ? (prev >= maxIndex ? 0 : prev + 1) : Math.min(prev + 1, maxIndex)));
   }, [maxIndex, infinite]);
 
-  // Navigate to the previous slide
   const goToPrev = useCallback(() => {
-    setCurrentIndex((prev) => {
-      if (infinite) {
-        // Loop back to the end if at the start in infinite mode
-        return prev <= 0 ? maxIndex : prev - 1;
-      }
-      return Math.max(prev - 1, 0);
-    });
+    setCurrentIndex((prev) => (infinite ? (prev <= 0 ? maxIndex : prev - 1) : Math.max(prev - 1, 0)));
   }, [maxIndex, infinite]);
 
-  // Directly navigate to a specific slide index
-  const goToSlide = useCallback((index: number) => {
-    setCurrentIndex(index);
-  }, []);
+  const goToSlide = useCallback((index: number) => setCurrentIndex(index), []);
 
-  // Autoplay logic: automatically slide at a set interval
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (autoplay) {
-      interval = setInterval(goToNext, autoplaySpeed);
-    }
+    if (autoplay && totalSlides > visibleSlides) interval = setInterval(goToNext, autoplaySpeed);
     return () => clearInterval(interval);
-  }, [autoplay, autoplaySpeed, goToNext]);
-
-  // Percentage width/height for each slide
-  const slidePercentage = useMemo(() => 100 / visibleSlides, [visibleSlides]);
-
-  const value = {
-    currentIndex,
-    totalSlides,
-    visibleSlides,
-    direction,
-    infinite,
-    gap,
-    goToNext,
-    goToPrev,
-    goToSlide,
-    slidePercentage,
-  };
+  }, [autoplay, autoplaySpeed, goToNext, totalSlides, visibleSlides]);
 
   return (
-    <SliderContext.Provider value={value}>
-      <SliderWrapper direction={direction}>
-        {children}
-      </SliderWrapper>
+    <SliderContext.Provider value={{ currentIndex, totalSlides, setTotalSlides, visibleSlides, direction, infinite, gap, goToNext, goToPrev, goToSlide }}>
+      <SliderWrapper direction={direction}>{children}</SliderWrapper>
     </SliderContext.Provider>
   );
 };
@@ -162,59 +114,38 @@ const SliderMain: React.FC<SliderProps> & {
 // --- Sub-Components ---
 
 const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentIndex, direction, slidePercentage, gap, goToNext, goToPrev } = useSlider();
+  const { currentIndex, direction, visibleSlides, setTotalSlides, gap, goToNext, goToPrev } = useSlider();
   const isHorizontal = direction === "horizontal";
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const count = React.Children.count(children);
 
-  // Swipe support: tracking touch start and move positions
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY);
-  };
+  // Sync totalSlides count back to context
+  useEffect(() => {
+    setTotalSlides(count);
+  }, [count, setTotalSlides]);
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(isHorizontal ? e.targetTouches[0].clientX : e.targetTouches[0].clientY);
-  };
+  if (count === 0) return null;
 
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const minSwipeDistance = 50; // Minimum distance to trigger a swipe
-
-    if (distance > minSwipeDistance) goToNext();
-    else if (distance < -minSwipeDistance) goToPrev();
-  };
-
-  // CSS transform value for sliding
-  const transformValue = isHorizontal
-    ? `translateX(-${currentIndex * slidePercentage}%)`
-    : `translateY(-${currentIndex * slidePercentage}%)`;
+  const transformPercentage = (currentIndex / count) * 100;
+  const transformValue = isHorizontal ? `translateX(-${transformPercentage}%)` : `translateY(-${transformPercentage}%)`;
+  const trackWidth = (count / visibleSlides) * 100;
 
   return (
-    <div style={{ overflow: "hidden", width: "100%" }}>
+    <div style={{ overflow: "hidden", width: "100%", height: isHorizontal ? "auto" : "100%" }}>
       <SlideTrack
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
         style={{
           transform: transformValue,
           flexDirection: isHorizontal ? "row" : "column",
-          display: "flex",
-          transition: "transform 0.3s ease-in-out",
-          margin: isHorizontal ? `0 -${gap / 2}px` : `-${gap / 2}px 0`,
+          width: isHorizontal ? `${trackWidth}%` : "100%",
+          height: isHorizontal ? "auto" : `${trackWidth}%`,
         }}
       >
         {React.Children.map(children, (child, index) => (
           <Slide
             key={index}
-            visibleSlides={1}
+            visibleSlides={visibleSlides}
             style={{
-              flex: `0 0 ${slidePercentage}%`,
-              width: isHorizontal ? `${slidePercentage}%` : "100%",
-              height: isHorizontal ? "auto" : `${slidePercentage}%`,
+              flex: `0 0 ${100 / count}%`,
               padding: isHorizontal ? `0 ${gap / 2}px` : `${gap / 2}px 0`,
-              boxSizing: "border-box",
             }}
           >
             {child}
@@ -228,17 +159,14 @@ const SliderTrack: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 interface ButtonProps {
   type: "prev" | "next";
   children?: React.ReactNode;
-  style?: "minimal" | "filled" | "outlined";
+  style?: "minimal" | "filled" | "outlined" | "plain";
 }
 
 const SliderButton: React.FC<ButtonProps> = ({ type, children, style = "minimal" }) => {
   const { goToNext, goToPrev, direction } = useSlider();
   const isHorizontal = direction === "horizontal";
   const handleClick = type === "next" ? goToNext : goToPrev;
-  
-  // Default icons for next/prev depending on direction
   const defaultIcon = type === "next" ? (isHorizontal ? ">" : "˅") : (isHorizontal ? "<" : "˄");
-
   return (
     <Arrow
       direction={type === "next" ? (isHorizontal ? "right" : "down") : (isHorizontal ? "left" : "up")}
@@ -253,9 +181,8 @@ const SliderButton: React.FC<ButtonProps> = ({ type, children, style = "minimal"
 
 const SliderDots: React.FC<{ position?: "top" | "bottom" | "left" | "right" }> = ({ position = "bottom" }) => {
   const { totalSlides, visibleSlides, currentIndex, goToSlide } = useSlider();
-  const numberOfDots = totalSlides - visibleSlides + 1;
+  const numberOfDots = Math.max(0, totalSlides - visibleSlides + 1);
   if (numberOfDots <= 1) return null;
-
   return (
     <DotsWrapper position={position}>
       {Array.from({ length: numberOfDots }).map((_, index) => (
@@ -265,7 +192,6 @@ const SliderDots: React.FC<{ position?: "top" | "bottom" | "left" | "right" }> =
   );
 };
 
-// Attach sub-components to the main Slider component
 SliderMain.Track = SliderTrack;
 SliderMain.Button = SliderButton;
 SliderMain.Dots = SliderDots;
